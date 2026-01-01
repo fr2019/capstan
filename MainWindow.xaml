@@ -1,0 +1,181 @@
+<Window x:Class="Capstan.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Capstan" 
+        Width="480"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+    <Grid>
+        <!-- Normal UI when multiple languages available -->
+        <Grid x:Name="NormalUI" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Mode Selection -->
+            <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                <RadioButton x:Name="TwoFavoritesRadio" Content="Toggle between two favorite keyboard layouts" 
+                             IsChecked="True" Checked="ModeRadio_Changed" Margin="0,0,0,5"/>
+                <RadioButton x:Name="CycleAllRadio" Content="Cycle through all keyboard layouts" 
+                             Checked="ModeRadio_Changed"/>
+            </StackPanel>
+
+            <!-- Two Favorites Panel -->
+            <StackPanel x:Name="TwoFavoritesPanel" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,5,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Keyboard layout 1:" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <ComboBox Grid.Row="0" Grid.Column="1" x:Name="Lang1Combo" Margin="0,0,0,10">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Opacity="{Binding ItemOpacity}">
+                                    <Border BorderBrush="#CCCCCC" BorderThickness="1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <Image Source="{Binding FlagPath}" Width="30" Height="20" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Keyboard layout 2:" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <ComboBox Grid.Row="1" Grid.Column="1" x:Name="Lang2Combo" Margin="0,0,0,10">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Opacity="{Binding ItemOpacity}">
+                                    <Border BorderBrush="#CCCCCC" BorderThickness="1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <Image Source="{Binding FlagPath}" Width="30" Height="20" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+            </StackPanel>
+
+            <!-- Cycle All Panel -->
+            <StackPanel x:Name="CycleAllPanel" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,5,0,0" Visibility="Collapsed">
+                <TextBlock Text="Cycle order:" Margin="0,0,0,5"/>
+                <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="CycleLayoutsList" Margin="15,0,0,10">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="{Binding Index}" Width="20" Foreground="Gray"/>
+                                    <Border BorderBrush="#CCCCCC" BorderThickness="1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <Image Source="{Binding Layout.FlagPath}" Width="30" Height="20" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding Layout.DisplayName}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+
+            <CheckBox Grid.Row="3" Grid.ColumnSpan="2" x:Name="OverlayCheckbox"
+                      Content="Show overlay when switching layouts" 
+                      IsChecked="True"
+                      Checked="OverlayCheckbox_Changed"
+                      Unchecked="OverlayCheckbox_Changed"
+                      Margin="0,5,0,5"/>
+
+            <CheckBox Grid.Row="4" Grid.ColumnSpan="2" x:Name="AccentCheckbox"
+                      Content="Hold key for accent menu (e.g., hold 'e' for é, è, ê)" 
+                      IsChecked="True"
+                      Checked="AccentCheckbox_Changed"
+                      Unchecked="AccentCheckbox_Changed"
+                      Margin="0,0,0,5"/>
+
+            <CheckBox Grid.Row="5" Grid.ColumnSpan="2" x:Name="StartupCheckbox"
+                      Content="Run when Windows starts" 
+                      IsChecked="True"
+                      Checked="StartupCheckbox_Changed"
+                      Unchecked="StartupCheckbox_Changed"
+                      Margin="0,0,0,10"/>
+
+            <TextBlock Grid.Row="6" Grid.ColumnSpan="2" x:Name="StatusText" 
+                       Text="✓ Running — Press Caps Lock to switch layouts" 
+                       Foreground="Green" Margin="0,10,0,0" TextWrapping="Wrap"/>
+
+            <Button Grid.Row="6" Grid.Column="0" Content="Language Settings" 
+                    Click="OpenLanguageSettings_Click"
+                    Padding="0" Background="Transparent" BorderBrush="Transparent" 
+                    Foreground="Blue" Cursor="Hand" HorizontalAlignment="Left" 
+                    VerticalAlignment="Bottom" Margin="0,25,0,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{TemplateBinding Content}" 
+                                   TextDecorations="Underline"
+                                   Foreground="{TemplateBinding Foreground}"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <Button Grid.Row="6" Grid.Column="1" Content="Hide to Background" 
+                    Click="Hide_Click" Padding="10,5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,25,0,0"/>
+        </Grid>
+
+        <!-- Single language UI -->
+        <StackPanel x:Name="SingleLangUI" Margin="20" Visibility="Collapsed">
+            <TextBlock Text="⚠ Only one keyboard layout installed" 
+                       FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10" TextWrapping="Wrap"/>
+
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">
+                Capstan needs at least two keyboard layouts to toggle between them.
+            </TextBlock>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="First, "/>
+                <Button Content="Open Language Settings" Click="OpenLanguageSettings_Click"
+                        Padding="0" Background="Transparent" BorderBrush="Transparent" 
+                        Foreground="Blue" Cursor="Hand" VerticalAlignment="Center">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <TextBlock Text="{TemplateBinding Content}" 
+                                       TextDecorations="Underline"
+                                       Foreground="{TemplateBinding Foreground}"/>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <TextBlock Text=" (Settings → Time &amp; Language → Language)" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <TextBlock Text="Option A: Add a keyboard layout" FontWeight="SemiBold" Margin="0,5,0,3"/>
+            <TextBlock Margin="15,0,0,2">1. Click on your language, then "Options"</TextBlock>
+            <TextBlock Margin="15,0,0,8">2. Click "Add a keyboard" and select a layout</TextBlock>
+
+            <TextBlock Text="Option B: Add a new language" FontWeight="SemiBold" Margin="0,5,0,3"/>
+            <TextBlock Margin="15,0,0,2">1. Click "Add a language"</TextBlock>
+            <TextBlock Margin="15,0,0,15">2. Choose a language and install it</TextBlock>
+
+            <TextBlock Text="Then return to Capstan." Margin="0,0,0,10"/>
+
+            <Button Content="Hide to Background" Click="Hide_Click" 
+                    Padding="10,5" HorizontalAlignment="Left"/>
+        </StackPanel>
+    </Grid>
+</Window>
