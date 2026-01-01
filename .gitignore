@@ -1,0 +1,44 @@
+# Build results
+bin/
+obj/
+publish/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+packages/
+
+# Build artifacts
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log
+
+# Publish profiles
+Properties/PublishProfiles/
+
+# Backup files
+*~
+*.bak
+*.swp
