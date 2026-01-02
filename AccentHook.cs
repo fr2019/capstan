@@ -89,6 +89,8 @@ public class AccentHook
             Interval = TimeSpan.FromMilliseconds(delayMs)
         };
         _longPressTimer.Tick += OnLongPressTimer;
+        
+        App.Log($"AccentHook installed, delay={delayMs}ms");
     }
 
     public void Uninstall()
@@ -104,6 +106,7 @@ public class AccentHook
             _mouseHookId = IntPtr.Zero;
         }
         _longPressTimer?.Stop();
+        App.Log("AccentHook uninstalled");
     }
 
     private static IntPtr MouseHookCallback(int nCode, IntPtr wParam, IntPtr lParam)

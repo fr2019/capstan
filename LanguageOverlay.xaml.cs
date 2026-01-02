@@ -11,21 +11,30 @@ public partial class LanguageOverlay : Window
 
     public LanguageOverlay()
     {
-        InitializeComponent();
-
-        _hideTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
-        _hideTimer.Tick += (s, e) =>
+        try
         {
-            _hideTimer.Stop();
-            FadeOut();
-        };
+            InitializeComponent();
 
-        // Start shown but invisible (avoids slow Show() call later)
-        Opacity = 0;
-        Show();
-        
-        // Initial position
-        UpdatePosition();
+            _hideTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
+            _hideTimer.Tick += (s, e) =>
+            {
+                _hideTimer.Stop();
+                FadeOut();
+            };
+
+            // Start shown but invisible (avoids slow Show() call later)
+            Opacity = 0;
+            Show();
+            
+            // Initial position
+            UpdatePosition();
+            App.Log("LanguageOverlay initialized");
+        }
+        catch (Exception ex)
+        {
+            App.Log($"LanguageOverlay init failed: {ex}");
+            throw;
+        }
     }
 
     private void UpdatePosition()
@@ -38,17 +47,24 @@ public partial class LanguageOverlay : Window
 
     public void Flash(string displayName)
     {
-        // Stop any animation in progress
-        BeginAnimation(OpacityProperty, null);
-        
-        LanguageText.Text = displayName;
+        try
+        {
+            // Stop any animation in progress
+            BeginAnimation(OpacityProperty, null);
+            
+            LanguageText.Text = displayName;
 
-        // Update position after content changes (for auto-width)
-        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, UpdatePosition);
+            // Update position after content changes (for auto-width)
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, UpdatePosition);
 
-        _hideTimer.Stop();
-        Opacity = 1;
-        _hideTimer.Start();
+            _hideTimer.Stop();
+            Opacity = 1;
+            _hideTimer.Start();
+        }
+        catch (Exception ex)
+        {
+            App.Log($"LanguageOverlay.Flash failed: {ex.Message}");
+        }
     }
 
     private void FadeOut()

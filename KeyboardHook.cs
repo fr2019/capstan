@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
@@ -27,18 +26,31 @@ public class KeyboardHook
 
     public void Install()
     {
-        // Clear caps lock if it's on
-        ClearCapsLock();
-
-        _proc = HookCallback;
-        using var curProcess = Process.GetCurrentProcess();
-        using var curModule = curProcess.MainModule!;
-        _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _proc, GetModuleHandle(curModule.ModuleName), 0);
-
-        if (_hookId == IntPtr.Zero)
+        try
         {
-            int error = Marshal.GetLastWin32Error();
-            MessageBox.Show($"Failed to install keyboard hook. Error: {error}", "Capstan", MessageBoxButton.OK, MessageBoxImage.Error);
+            // Clear caps lock if it's on
+            ClearCapsLock();
+
+            _proc = HookCallback;
+            using var curProcess = System.Diagnostics.Process.GetCurrentProcess();
+            using var curModule = curProcess.MainModule!;
+            _hookId = SetWindowsHookEx(WH_KEYBOARD_LL, _proc, GetModuleHandle(curModule.ModuleName), 0);
+
+            if (_hookId == IntPtr.Zero)
+            {
+                int error = Marshal.GetLastWin32Error();
+                App.Log($"Failed to install keyboard hook. Error: {error}");
+                MessageBox.Show($"Failed to install keyboard hook. Error: {error}", "Capstan", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                App.Log("Keyboard hook installed successfully");
+            }
+        }
+        catch (Exception ex)
+        {
+            App.Log($"KeyboardHook.Install failed: {ex}");
+            throw;
         }
     }
 
@@ -50,6 +62,7 @@ public class KeyboardHook
             // Simulate key press to turn it off
             keybd_event(VK_CAPITAL, 0x45, KEYEVENTF_EXTENDEDKEY, UIntPtr.Zero);
             keybd_event(VK_CAPITAL, 0x45, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, UIntPtr.Zero);
+            App.Log("Cleared caps lock");
         }
     }
 
@@ -59,29 +72,37 @@ public class KeyboardHook
         {
             UnhookWindowsHookEx(_hookId);
             _hookId = IntPtr.Zero;
+            App.Log("Keyboard hook uninstalled");
         }
     }
 
     private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
-        if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
+        try
         {
-            int vkCode = Marshal.ReadInt32(lParam);
-
-            if (vkCode == VK_CAPITAL && Settings.HookEnabled)
+            if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
             {
-                if (Settings.CycleAllLayouts)
-                {
-                    CycleToNextLayout();
-                }
-                else
-                {
-                    _isLayout2 = !_isLayout2;
-                    SwitchToLayout(_isLayout2 ? Settings.Layout2 : Settings.Layout1);
-                }
+                int vkCode = Marshal.ReadInt32(lParam);
 
-                return (IntPtr)1;
+                if (vkCode == VK_CAPITAL && Settings.HookEnabled)
+                {
+                    if (Settings.CycleAllLayouts)
+                    {
+                        CycleToNextLayout();
+                    }
+                    else
+                    {
+                        _isLayout2 = !_isLayout2;
+                        SwitchToLayout(_isLayout2 ? Settings.Layout2 : Settings.Layout1);
+                    }
+
+                    return (IntPtr)1;
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            App.Log($"HookCallback error: {ex.Message}");
         }
 
         return CallNextHookEx(_hookId, nCode, wParam, lParam);
@@ -126,7 +147,7 @@ public class KeyboardHook
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to switch layout: {ex.Message}");
+            App.Log($"SwitchToLayout failed: {ex}");
         }
     }
 

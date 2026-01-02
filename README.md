@@ -33,9 +33,9 @@ No .NET installation required — everything is included.
 ### Steps
 
 1. Clone the repository:
-```
+   ```
    git clone https://github.com/fr2019/capstan.git
-```
+   ```
 
 2. Open `Capstan.sln` in Visual Studio 2022
 
@@ -44,6 +44,7 @@ No .NET installation required — everything is included.
    - Select **Build → Publish** to create a release package
 
 ### Creating a Release Package
+
 ```powershell
 dotnet publish Capstan.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o .\publish
 ```
@@ -94,3 +95,13 @@ Zip the `publish` folder for distribution.
 **Layouts aren't switching**: Ensure you have at least two keyboard layouts installed in Windows Settings.
 
 **App won't start**: Make sure you extracted all files from the zip, not just the .exe.
+
+**App crashes or behaves unexpectedly**: Check `capstan.log` in the same folder as `Capstan.exe` for error details. The log file is automatically kept under 1MB.
+
+## Logging
+
+Capstan writes diagnostic information to `capstan.log` in the application folder. This log:
+- Records app startup, shutdown, and errors
+- Helps diagnose crashes and unexpected behavior
+- Automatically resets when it exceeds 1MB
+- Can be safely deleted if not needed

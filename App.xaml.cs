@@ -1,5 +1,7 @@
 using System;
 using System.Drawing;
+using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using Forms = System.Windows.Forms;
 
@@ -13,37 +15,73 @@ public partial class App : Application
     private Forms.NotifyIcon? _trayIcon;
     private MainWindow? _mainWindow;
 
+    private static string LogPath => Path.Combine(AppContext.BaseDirectory, "capstan.log");
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        _overlay = new LanguageOverlay();
-        _hook = new KeyboardHook(_overlay);
-        _hook.Install();
-        
-        _accentHook = new AccentHook();
-        _accentHook.Install();
-
-        _mainWindow = new MainWindow();
-        
-        // Check if started with --minimized (e.g., from Windows startup)
-        bool startMinimized = false;
-        foreach (string arg in e.Args)
+        // Global exception handlers
+        AppDomain.CurrentDomain.UnhandledException += (s, args) =>
         {
-            if (arg.Equals("--minimized", StringComparison.OrdinalIgnoreCase) ||
-                arg.Equals("/minimized", StringComparison.OrdinalIgnoreCase))
+            Log($"FATAL: {args.ExceptionObject}");
+        };
+
+        DispatcherUnhandledException += (s, args) =>
+        {
+            Log($"UI Exception: {args.Exception}");
+            args.Handled = true;
+        };
+
+        TaskScheduler.UnobservedTaskException += (s, args) =>
+        {
+            Log($"Task Exception: {args.Exception}");
+            args.SetObserved();
+        };
+
+        Log("App starting");
+
+        try
+        {
+            _overlay = new LanguageOverlay();
+            Log("LanguageOverlay created");
+
+            _hook = new KeyboardHook(_overlay);
+            _hook.Install();
+            Log("KeyboardHook installed");
+
+            _accentHook = new AccentHook();
+            _accentHook.Install();
+            Log("AccentHook installed");
+
+            _mainWindow = new MainWindow();
+            Log("MainWindow created");
+
+            // Check if started with --minimized (e.g., from Windows startup)
+            bool startMinimized = false;
+            foreach (string arg in e.Args)
             {
-                startMinimized = true;
-                break;
+                if (arg.Equals("--minimized", StringComparison.OrdinalIgnoreCase) ||
+                    arg.Equals("/minimized", StringComparison.OrdinalIgnoreCase))
+                {
+                    startMinimized = true;
+                    break;
+                }
             }
-        }
-        
-        if (!startMinimized)
-        {
-            _mainWindow.Show();
-        }
 
-        SetupTrayIcon();
+            if (!startMinimized)
+            {
+                _mainWindow.Show();
+            }
+
+            SetupTrayIcon();
+            Log("App started successfully");
+        }
+        catch (Exception ex)
+        {
+            Log($"Startup failed: {ex}");
+            throw;
+        }
     }
 
     private void SetupTrayIcon()
@@ -86,16 +124,36 @@ public partial class App : Application
                 return new Icon(stream);
             }
         }
-        catch { }
-        
+        catch (Exception ex)
+        {
+            Log($"Failed to load icon: {ex.Message}");
+        }
+
         return SystemIcons.Application;
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        Log("App exiting");
         _trayIcon?.Dispose();
         _hook?.Uninstall();
         _accentHook?.Uninstall();
         base.OnExit(e);
+    }
+
+    public static void Log(string message)
+    {
+        try
+        {
+            // Keep log under 1MB - delete if too big
+            if (File.Exists(LogPath) && new FileInfo(LogPath).Length > 1_000_000)
+            {
+                File.Delete(LogPath);
+            }
+
+            string line = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} | {message}";
+            File.AppendAllText(LogPath, line + Environment.NewLine);
+        }
+        catch { }
     }
 }

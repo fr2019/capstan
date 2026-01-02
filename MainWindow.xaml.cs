@@ -16,12 +16,22 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        Settings.Load();
-        InitializeComponent();
-        LoadAvailableLayouts();
+        try
+        {
+            App.Log("MainWindow initializing");
+            Settings.Load();
+            InitializeComponent();
+            LoadAvailableLayouts();
 
-        // Monitor for language changes
-        InputLanguageManager.Current.InputLanguageChanged += OnInputLanguageChanged;
+            // Monitor for language changes
+            InputLanguageManager.Current.InputLanguageChanged += OnInputLanguageChanged;
+            App.Log("MainWindow initialized");
+        }
+        catch (Exception ex)
+        {
+            App.Log($"MainWindow init failed: {ex}");
+            throw;
+        }
     }
 
     private void OnInputLanguageChanged(object sender, InputLanguageEventArgs e)

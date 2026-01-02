@@ -21,13 +21,22 @@ public partial class AccentOverlay : Window
     private System.Windows.Threading.DispatcherTimer? _topmostTimer;
     public AccentOverlay()
     {
-        InitializeComponent();
-        SourceInitialized += OnSourceInitialized;
-        Loaded += OnLoaded;
+        try
+        {
+            InitializeComponent();
+            SourceInitialized += OnSourceInitialized;
+            Loaded += OnLoaded;
 
-        // Start off-screen to prevent white flash on first show
-        Left = -10000;
-        Top = -10000;
+            // Start off-screen to prevent white flash on first show
+            Left = -10000;
+            Top = -10000;
+            App.Log("AccentOverlay initialized");
+        }
+        catch (Exception ex)
+        {
+            App.Log($"AccentOverlay init failed: {ex}");
+            throw;
+        }
     }
 
     private void OnSourceInitialized(object? sender, EventArgs e)

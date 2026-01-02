@@ -43,7 +43,7 @@ public static class Settings
             using var key = Registry.CurrentUser.OpenSubKey(RegistryKey);
             if (key == null)
             {
-                System.Diagnostics.Debug.WriteLine("Capstan: No registry key found, using defaults");
+                App.Log("No registry key found, using defaults");
                 return;
             }
             
@@ -67,11 +67,11 @@ public static class Settings
             if (accentVal != null)
                 AccentHoldEnabled = Convert.ToInt32(accentVal) != 0;
             
-            System.Diagnostics.Debug.WriteLine($"Capstan: Loaded settings - Layout1={Layout1:X}, Layout2={Layout2:X}, ShowOverlay={ShowOverlay}, CycleAll={CycleAllLayouts}, Accent={AccentHoldEnabled}");
+            App.Log($"Loaded settings - Layout1={Layout1:X}, Layout2={Layout2:X}, ShowOverlay={ShowOverlay}, CycleAll={CycleAllLayouts}, Accent={AccentHoldEnabled}");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Capstan: Error loading settings: {ex.Message}");
+            App.Log($"Error loading settings: {ex.Message}");
         }
     }
 
@@ -82,7 +82,7 @@ public static class Settings
             using var key = Registry.CurrentUser.CreateSubKey(RegistryKey);
             if (key == null)
             {
-                System.Diagnostics.Debug.WriteLine("Capstan: Failed to create registry key");
+                App.Log("Failed to create registry key");
                 return;
             }
             
@@ -92,11 +92,11 @@ public static class Settings
             key.SetValue("CycleAllLayouts", CycleAllLayouts ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue("AccentHoldEnabled", AccentHoldEnabled ? 1 : 0, RegistryValueKind.DWord);
             
-            System.Diagnostics.Debug.WriteLine($"Capstan: Saved settings - Layout1={Layout1:X}, Layout2={Layout2:X}, ShowOverlay={ShowOverlay}, CycleAll={CycleAllLayouts}, Accent={AccentHoldEnabled}");
+            App.Log($"Saved settings - Layout1={Layout1:X}, Layout2={Layout2:X}, ShowOverlay={ShowOverlay}, CycleAll={CycleAllLayouts}, Accent={AccentHoldEnabled}");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Capstan: Error saving settings: {ex.Message}");
+            App.Log($"Error saving settings: {ex.Message}");
         }
     }
 }
